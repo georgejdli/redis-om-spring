@@ -20,17 +20,19 @@ public class LocalDateTypeAdapter  implements JsonSerializer<LocalDate>, JsonDes
 
   @Override
   public JsonElement serialize(LocalDate localDate, Type typeOfSrc, JsonSerializationContext context) {
-    Instant instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();  
+    Instant instant = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
     long unixTime = instant.getEpochSecond();
     return new JsonPrimitive(unixTime);
   }
-  
+
   @Override
   public LocalDate deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
       throws JsonParseException {
-    return LocalDate.ofInstant(Instant.ofEpochSecond(json.getAsLong()), ZoneId.systemDefault());
+    // return LocalDate.ofInstant(Instant.ofEpochSecond(json.getAsLong()), ZoneId.systemDefault());
+    return Instant.ofEpochSecond(json.getAsLong()).atZone(ZoneId.systemDefault()).toLocalDate();
+
   }
-  
+
   public static LocalDateTypeAdapter getInstance() {
     return new LocalDateTypeAdapter();
   }

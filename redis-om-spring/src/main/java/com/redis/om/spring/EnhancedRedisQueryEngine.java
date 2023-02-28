@@ -1,5 +1,6 @@
 package com.redis.om.spring;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -30,7 +31,7 @@ public class EnhancedRedisQueryEngine extends QueryEngine<RedisKeyValueAdapter, 
   }
 
   /* (non-Javadoc)
-   * 
+   *
    * @see
    * org.springframework.data.keyvalue.core.QueryEngine#execute(java.lang.Object,
    * java.lang.Object, int, int, java.lang.String, java.lang.Class) */
@@ -39,7 +40,7 @@ public class EnhancedRedisQueryEngine extends QueryEngine<RedisKeyValueAdapter, 
   public <T> Collection<T> execute(RedisOperationChain criteria, Comparator<?> sort, long offset, int rows,
       String keyspace, Class<T> type) {
     logger.debug(String.format("Executing %s", criteria));
-    List<T> result = List.of();
+    List<T> result = Arrays.asList();
     // TODO: implement me!
 
     if (sort != null) {

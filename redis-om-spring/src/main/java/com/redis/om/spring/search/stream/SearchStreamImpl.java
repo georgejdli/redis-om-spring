@@ -267,7 +267,7 @@ public class SearchStreamImpl<E> implements SearchStream<E> {
 
   @Override
   public long count() {
-    Query query = (rootNode.toString().isBlank()) ? new Query() : new Query(rootNode.toString());
+    Query query = (rootNode.toString().trim().isEmpty()) ? new Query() : new Query(rootNode.toString());
     query.limit(0, 0);
     SearchResult searchResult = search.search(query);
 
@@ -349,7 +349,7 @@ public class SearchStreamImpl<E> implements SearchStream<E> {
   }
 
   Query prepareQuery() {
-    Query query = (rootNode.toString().isBlank()) ? new Query() : new Query(rootNode.toString());
+    Query query = (rootNode.toString().trim().isEmpty()) ? new Query() : new Query(rootNode.toString());
 
     query.limit(skip.map(Long::intValue).orElse(0), limit.map(Long::intValue).orElse(MAX_LIMIT));
 
@@ -431,13 +431,13 @@ public class SearchStreamImpl<E> implements SearchStream<E> {
 
   @Override public <R> AggregationStream<R> groupBy(MetamodelField<E, ?>... fields) {
     this.close();
-    String query = (rootNode.toString().isBlank()) ? "*" : rootNode.toString();
+    String query = (rootNode.toString().trim().isEmpty()) ? "*" : rootNode.toString();
     return new AggregationStreamImpl<>(searchIndex, modulesOperations, query, fields);
   }
 
   @Override public <R> AggregationStream<R> apply(String expression, String alias) {
     this.close();
-    String query = (rootNode.toString().isBlank()) ? "*" : rootNode.toString();
+    String query = (rootNode.toString().trim().isEmpty()) ? "*" : rootNode.toString();
     AggregationStream<R> aggregationStream = new AggregationStreamImpl<>(searchIndex, modulesOperations, query);
     aggregationStream.apply(expression, alias);
     return aggregationStream;
@@ -445,7 +445,7 @@ public class SearchStreamImpl<E> implements SearchStream<E> {
 
   @Override public <R> AggregationStream<R> load(MetamodelField<E, ?>... fields) {
     this.close();
-    String query = (rootNode.toString().isBlank()) ? "*" : rootNode.toString();
+    String query = (rootNode.toString().trim().isEmpty()) ? "*" : rootNode.toString();
     AggregationStream<R> aggregationStream = new AggregationStreamImpl<>(searchIndex, modulesOperations, query);
     aggregationStream.load(fields);
     return aggregationStream;

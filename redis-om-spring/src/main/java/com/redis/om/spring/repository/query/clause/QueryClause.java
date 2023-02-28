@@ -2,9 +2,11 @@ package com.redis.om.spring.repository.query.clause;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -188,11 +190,11 @@ public enum QueryClause {
     }
   }
 
-  public static final Map<String,String> methodNameMap = Map.of(
-      "IsContainingAll", "IsContaining",
-      "ContainingAll", "Containing",
-      "ContainsAll", "Contains"
-  );
+  public static final Map<String,String> methodNameMap = new HashMap<String, String>() {{
+    put("IsContainingAll", "IsContaining");
+    put("ContainingAll", "Containing");
+    put("ContainsAll", "Contains");
+  }};
 
   public static final Pattern CONTAINING_ALL_PATTERN = Pattern.compile("(IsContainingAll|ContainingAll|ContainsAll)");
 
@@ -202,9 +204,23 @@ public enum QueryClause {
 
   public static String getPostProcessMethodName(String methodName) {
     if (hasContainingAllClause(methodName)) {
-      Optional<String> maybeMatchSubstring = CONTAINING_ALL_PATTERN.matcher(methodName).results().map(mr -> mr.group(1)).findFirst();
-      if (maybeMatchSubstring.isPresent()) {
-        String matchSubstring = maybeMatchSubstring.get();
+
+
+      // Optional<String> maybeMatchSubstring = CONTAINING_ALL_PATTERN.matcher(methodName).results().map(mr -> mr.group(1)).findFirst();
+
+
+      // if (maybeMatchSubstring.isPresent()) {
+      //   String matchSubstring = maybeMatchSubstring.get();
+      //   return methodName.replace(matchSubstring, methodNameMap.get(matchSubstring));
+      // } else {
+      //   return methodName;
+      // }
+
+      // Java 8 implementation, results() stream is wholly unnecessary
+      Matcher matcher = CONTAINING_ALL_PATTERN.matcher(methodName);
+
+      if (matcher.find()) {
+        String matchSubstring = matcher.group(1);
         return methodName.replace(matchSubstring, methodNameMap.get(matchSubstring));
       } else {
         return methodName;

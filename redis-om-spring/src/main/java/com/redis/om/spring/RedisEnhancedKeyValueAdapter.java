@@ -3,9 +3,11 @@ package com.redis.om.spring;
 import static com.redis.om.spring.util.ObjectUtils.documentToObject;
 import static com.redis.om.spring.util.ObjectUtils.getIdFieldForEntity;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -189,7 +191,7 @@ public class RedisEnhancedKeyValueAdapter extends RedisKeyValueAdapter {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.springframework.data.keyvalue.core.AbstractKeyValueAdapter#delete(java.
    * lang.Object, java.lang.String, java.lang.Class)
@@ -231,7 +233,7 @@ public class RedisEnhancedKeyValueAdapter extends RedisKeyValueAdapter {
 
   public <T> List<String> getAllIds(String keyspace, Class<T> type) {
     Optional<String> maybeSearchIndex = indexer.getIndexName(keyspace);
-    List<String> keys = List.of();
+    List<String> keys = Arrays.asList();
     if (maybeSearchIndex.isPresent()) {
       SearchOperations<String> searchOps = modulesOperations.opsForSearch(maybeSearchIndex.get());
       Optional<Field> maybeIdField = com.redis.om.spring.util.ObjectUtils.getIdFieldForEntityClass(type);
@@ -267,7 +269,7 @@ public class RedisEnhancedKeyValueAdapter extends RedisKeyValueAdapter {
   public <T> List<T> getAllOf(String keyspace, Class<T> type, long offset, int rows) {
     Optional<String> maybeSearchIndex = indexer.getIndexName(keyspace);
 
-    List<T> result = List.of();
+    List<T> result = Arrays.asList();
     if (maybeSearchIndex.isPresent()) {
       SearchOperations<String> searchOps = modulesOperations.opsForSearch(maybeSearchIndex.get());
       Query query = new Query("*");
@@ -343,7 +345,7 @@ public class RedisEnhancedKeyValueAdapter extends RedisKeyValueAdapter {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.springframework.data.keyvalue.core.KeyValueAdapter#count(java.lang.
    * String)
    */
@@ -356,9 +358,9 @@ public class RedisEnhancedKeyValueAdapter extends RedisKeyValueAdapter {
       // FT.SEARCH index * LIMIT 0 0
       Query query = new Query("*");
       query.limit(0, 0);
-      
+
       SearchResult result = search.search(query);
-      
+
       count = result.totalResults;
     }
     return count;
@@ -366,7 +368,7 @@ public class RedisEnhancedKeyValueAdapter extends RedisKeyValueAdapter {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.springframework.data.keyvalue.core.KeyValueAdapter#contains(java.lang.
    * Object, java.lang.String)
@@ -473,7 +475,7 @@ public class RedisEnhancedKeyValueAdapter extends RedisKeyValueAdapter {
     boolean isNew = (boolean) redisOperations
         .execute((RedisCallback<Object>) connection -> !connection.exists(redisKey));
 
-    var auditClass = isNew ? CreatedDate.class : LastModifiedDate.class;
+    Class<? extends Annotation> auditClass = isNew ? CreatedDate.class : LastModifiedDate.class;
 
     List<Field> fields = com.redis.om.spring.util.ObjectUtils.getFieldsWithAnnotation(item.getClass(), auditClass);
     if (!fields.isEmpty()) {

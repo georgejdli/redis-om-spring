@@ -38,7 +38,7 @@ import io.redisearch.Suggestion;
 public class AutoCompleteAspect implements Ordered {
   @Autowired
   private Gson gson;
-  
+
   private RedisModulesOperations<String> rmo;
 
   public AutoCompleteAspect(RedisModulesOperations<String> rmo) {
@@ -193,7 +193,7 @@ public class AutoCompleteAspect implements Ordered {
         for (Field field2 : entity.getClass().getDeclaredFields()) {
           if (field2.isAnnotationPresent(AutoCompletePayload.class)) {
             AutoCompletePayload suggestablePayload = field2.getAnnotation(AutoCompletePayload.class);
-            boolean inPayload = (!suggestablePayload.value().isBlank()
+            boolean inPayload = (!suggestablePayload.value().trim().isEmpty()
                 && suggestablePayload.value().equalsIgnoreCase(field.getName()))
                 || (Arrays.asList(suggestablePayload.fields()).contains(field.getName()));
             if (inPayload) {

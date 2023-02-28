@@ -1,6 +1,7 @@
 package com.redis.om.spring.ops.search;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -252,7 +253,7 @@ public class SearchOperationsImpl<K> implements SearchOperations<K> {
     args.add(SafeEncoder.encode(index.toString()));
     args.add(SafeEncoder.encode(field));
 
-    List<String> result = List.of();
+    List<String> result = Arrays.asList();
 
     try (Jedis conn = client.connection()) {
       BinaryClient bc = conn.getClient();

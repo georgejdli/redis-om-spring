@@ -13,7 +13,8 @@ public class BytesToLocalDateConverter implements Converter<byte[], LocalDate> {
 
   @Override
   public LocalDate convert(byte[] source) {
-    return LocalDate.ofInstant(Instant.ofEpochSecond(Long.parseLong(toString(source))), ZoneId.systemDefault());
+    //return LocalDate.ofInstant(Instant.ofEpochSecond(Long.parseLong(toString(source))), ZoneId.systemDefault());
+    return Instant.ofEpochSecond(Long.parseLong(toString(source))).atZone(ZoneId.systemDefault()).toLocalDate();
   }
 
   String toString(byte[] source) {

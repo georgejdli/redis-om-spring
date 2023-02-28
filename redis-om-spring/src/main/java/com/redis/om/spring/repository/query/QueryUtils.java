@@ -1,16 +1,18 @@
 package com.redis.om.spring.repository.query;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 public class QueryUtils {
-  public static final Set<Character> TAG_ESCAPE_CHARS = Set.of( //
+  public static final Set<Character> TAG_ESCAPE_CHARS = new HashSet<>(Arrays.asList(//
       ',', '.', '<', '>', '{', '}', '[', //
       ']', '"', '\'', ':', ';', '!', '@', //
       '#', '$', '%', '^', '&', '*', '(', //
       ')', '-', '+', '=', '~', '|', ' ' //
-  );
-  
+  ));
+
   public static String escape(String text) {
     return escape(text, false, false);
   }
@@ -19,7 +21,7 @@ public class QueryUtils {
   }
 
   public static String escape(String text, boolean querying, boolean isCsv) {
-    var sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder();
     char[] chars = text.toCharArray();
 
     for (char c : chars) {
@@ -34,27 +36,27 @@ public class QueryUtils {
 
     return sb.toString();
   }
-  
+
   public static String unescape(String text) {
     return text.replace("\\", "");
   }
-  
+
   @SuppressWarnings("unchecked")
   public static <T> T escape(T maybeText) {
     return CharSequence.class.isAssignableFrom(maybeText.getClass()) ? (T) escape(maybeText.toString()) : maybeText;
   }
-  
+
   public static String searchIndexFieldAliasFor(Field field, String prefix) {
     String alias = field.getName();
-    if (prefix != null && !prefix.isBlank()) {
+    if (prefix != null && !prefix.trim().isEmpty()) {
       alias = prefix.replace(".", "_") + "_" + alias;
-    } 
+    }
     return alias;
   }
-  
+
   public static String searchIndexFieldAliasFor(Field field) {
     return searchIndexFieldAliasFor(field, null);
   }
-  
+
   private QueryUtils() {}
 }

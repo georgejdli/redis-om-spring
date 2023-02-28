@@ -1,9 +1,11 @@
 package com.redis.om.spring;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.convert.KeyspaceConfiguration;
 import org.springframework.data.redis.core.convert.RedisCustomConversions;
+import org.springframework.data.redis.core.convert.KeyspaceConfiguration.KeyspaceSettings;
 import org.springframework.data.redis.core.mapping.RedisMappingContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
@@ -136,7 +139,7 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
   public <T> List<T> getAllOf(String keyspace, Class<T> type, long offset, int rows) {
     Optional<String> maybeSearchIndex = indexer.getIndexName(keyspace);
 
-    List<T> result = List.of();
+    List<T> result = Arrays.asList();
     if (maybeSearchIndex.isPresent()) {
       SearchOperations<String> searchOps = modulesOperations.opsForSearch(maybeSearchIndex.get());
       Query query = new Query("*");
@@ -157,7 +160,7 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
   public <T> List<String> getAllKeys(String keyspace, Class<T> type) {
     Optional<String> maybeSearchIndex = indexer.getIndexName(keyspace);
 
-    List<String> keys = List.of();
+    List<String> keys = Arrays.asList();
     if (maybeSearchIndex.isPresent()) {
       SearchOperations<String> searchOps = modulesOperations.opsForSearch(maybeSearchIndex.get());
       Optional<Field> maybeIdField = ObjectUtils.getIdFieldForEntityClass(type);
@@ -166,7 +169,7 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
       Query query = new Query("*");
       query.returnFields(idField);
       SearchResult searchResult = searchOps.search(query);
-      
+
       keys = searchResult.docs.stream()
           .map(Document::getId) //
           .collect(Collectors.toList());
@@ -177,7 +180,7 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.springframework.data.keyvalue.core.AbstractKeyValueAdapter#delete(java.
    * lang.Object, java.lang.String, java.lang.Class)
@@ -214,7 +217,7 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.springframework.data.keyvalue.core.KeyValueAdapter#count(java.lang.
    * String)
    */
@@ -227,9 +230,9 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
       // FT.SEARCH index * LIMIT 0 0
       Query query = new Query("*");
       query.limit(0, 0);
-      
+
       SearchResult result = search.search(query);
-      
+
       count = result.totalResults;
     }
     return count;
@@ -237,7 +240,7 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.springframework.data.keyvalue.core.KeyValueAdapter#contains(java.lang.
    * Object, java.lang.String)
@@ -254,7 +257,7 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
     boolean isNew = (boolean) redisOperations
         .execute((RedisCallback<Object>) connection -> !connection.exists(toBytes(key)));
 
-    var auditClass = isNew ? CreatedDate.class : LastModifiedDate.class;
+    Class<? extends Annotation> auditClass = isNew ? CreatedDate.class : LastModifiedDate.class;
 
     List<Field> fields = ObjectUtils.getFieldsWithAnnotation(item.getClass(), auditClass);
     if (!fields.isEmpty()) {
@@ -278,7 +281,7 @@ public class RedisJSONKeyValueAdapter extends RedisKeyValueAdapter {
   private Optional<Long> getTTLForEntity(Object entity) {
     KeyspaceConfiguration keyspaceConfig = mappingContext.getMappingConfiguration().getKeyspaceConfiguration();
     if (keyspaceConfig.hasSettingsFor(entity.getClass())) {
-      var settings = keyspaceConfig.getKeyspaceSettings(entity.getClass());
+      KeyspaceSettings settings = keyspaceConfig.getKeyspaceSettings(entity.getClass());
 
       if (StringUtils.hasText(settings.getTimeToLivePropertyName())) {
         Method ttlGetter;

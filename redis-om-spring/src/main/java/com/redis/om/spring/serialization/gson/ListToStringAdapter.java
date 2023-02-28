@@ -1,6 +1,7 @@
 package com.redis.om.spring.serialization.gson;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public class ListToStringAdapter extends TypeAdapter<List<?>> {
     }
     String csv = reader.nextString();
     String[] parts = csv.split("\\|");
-    return List.of(parts);
+    return Arrays.asList(parts);
   }
 
 }

@@ -1,9 +1,11 @@
 package com.redis.om.spring.repository.support;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +53,7 @@ import redis.clients.jedis.Pipeline;
 
 public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueRepository<T, ID>
     implements RedisEnhancedRepository<T, ID> {
-  
+
   private static final Integer MAX_LIMIT = 10000;
 
   protected RedisModulesOperations<String> modulesOperations;
@@ -84,16 +86,16 @@ public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueReposito
   public Iterable<ID> getIds() {
     String keyspace = indexer.getKeyspaceForEntityClass(metadata.getJavaType());
     Optional<String> maybeSearchIndex = indexer.getIndexName(keyspace);
-    List<ID> result = List.of();
+    List<ID> result = Arrays.asList();
     if (maybeSearchIndex.isPresent()) {
       SearchOperations<String> searchOps = modulesOperations.opsForSearch(maybeSearchIndex.get());
       Optional<Field> maybeIdField = ObjectUtils.getIdFieldForEntityClass(metadata.getJavaType());
       String idField = maybeIdField.isPresent() ? maybeIdField.get().getName() : "id";
-      
+
       Query query = new Query("*");
       query.returnFields(idField);
       SearchResult searchResult = searchOps.search(query);
-  
+
       result = (List<ID>) searchResult.docs.stream()
           .map(d -> ObjectUtils.documentToObject(d, metadata.getJavaType(), mappingConverter)) //
           .map(e -> ObjectUtils.getIdFieldForEntity(maybeIdField.get(), e)) //
@@ -109,7 +111,7 @@ public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueReposito
 
     int fromIndex = Long.valueOf(pageable.getOffset()).intValue();
     int toIndex = fromIndex + pageable.getPageSize();
-    
+
     return new PageImpl<ID>((List<ID>) ids.subList(fromIndex, toIndex), pageable, ids.size());
   }
 
@@ -141,7 +143,7 @@ public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueReposito
   }
 
   /* (non-Javadoc)
-   * 
+   *
    * @see org.springframework.data.repository.CrudRepository#findAll() */
   @Override
   public List<T> findAll() {
@@ -153,7 +155,7 @@ public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueReposito
   // -------------------------------------------------------------------------
 
   /* (non-Javadoc)
-   * 
+   *
    * @see
    * org.springframework.data.repository.PagingAndSortingRepository#findAll(org.
    * springframework.data.domain.Sort) */
@@ -161,14 +163,14 @@ public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueReposito
   public Iterable<T> findAll(Sort sort) {
 
     Assert.notNull(sort, "Sort must not be null!");
-    
+
     Pageable pageRequest = PageRequest.of(0, MAX_LIMIT, sort);
 
     return findAll(pageRequest);
   }
 
   /* (non-Javadoc)
-   * 
+   *
    * @see
    * org.springframework.data.repository.PagingAndSortingRepository#findAll(org.
    * springframework.data.domain.Pageable) */
@@ -206,7 +208,7 @@ public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueReposito
       } else {
         return Page.empty();
       }
-      
+
     } else {
       Iterable<T> content = operations.findInRange(pageable.getOffset(), pageable.getPageSize(), pageable.getSort(),
           metadata.getJavaType());
@@ -218,7 +220,7 @@ public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueReposito
   private String getKeyspace() {
     return indexer.getKeyspaceForEntityClass(metadata.getJavaType());
   }
-  
+
   private String getKey(Object id) {
     return getKeyspace() + id.toString();
   }
@@ -269,7 +271,7 @@ public class SimpleRedisEnhancedRepository<T, ID> extends SimpleKeyValueReposito
   }
 
   private void processAuditAnnotations(byte[] redisKey, Object item, boolean isNew) {
-    var auditClass = isNew ? CreatedDate.class : LastModifiedDate.class;
+    Class<? extends Annotation> auditClass = isNew ? CreatedDate.class : LastModifiedDate.class;
 
     List<Field> fields = com.redis.om.spring.util.ObjectUtils.getFieldsWithAnnotation(item.getClass(), auditClass);
     if (!fields.isEmpty()) {

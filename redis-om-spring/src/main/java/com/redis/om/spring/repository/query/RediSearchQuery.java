@@ -179,7 +179,7 @@ public class RediSearchQuery implements RepositoryQuery {
                 int sampleSize = Integer.parseInt(reducer.args()[1]);
                 r = Reducers.random_sample(arg0, sampleSize); break;
             }
-            if (r != null && alias != null && !alias.isBlank()) {
+            if (r != null && alias != null && !alias.trim().isEmpty()) {
               r.setAlias(alias);
             }
             group.reduce(r);
@@ -249,27 +249,27 @@ public class RediSearchQuery implements RepositoryQuery {
       field = type.getDeclaredField(property);
       if (field.isAnnotationPresent(TextIndexed.class)) {
         TextIndexed indexAnnotation = field.getAnnotation(TextIndexed.class);
-        String actualKey = indexAnnotation.alias().isBlank() ? key : indexAnnotation.alias();
+        String actualKey = indexAnnotation.alias().trim().isEmpty() ? key : indexAnnotation.alias();
         qf.add(Pair.of(actualKey, QueryClause.get(FieldType.FullText, part.getType())));
       } else if (field.isAnnotationPresent(Searchable.class)) {
         Searchable indexAnnotation = field.getAnnotation(Searchable.class);
-        String actualKey = indexAnnotation.alias().isBlank() ? key : indexAnnotation.alias();
+        String actualKey = indexAnnotation.alias().trim().isEmpty() ? key : indexAnnotation.alias();
         qf.add(Pair.of(actualKey, QueryClause.get(FieldType.FullText, part.getType())));
       } else if (field.isAnnotationPresent(TagIndexed.class)) {
         TagIndexed indexAnnotation = field.getAnnotation(TagIndexed.class);
-        String actualKey = indexAnnotation.alias().isBlank() ? key : indexAnnotation.alias();
+        String actualKey = indexAnnotation.alias().trim().isEmpty() ? key : indexAnnotation.alias();
         qf.add(Pair.of(actualKey, QueryClause.get(FieldType.Tag, part.getType())));
       } else if (field.isAnnotationPresent(GeoIndexed.class)) {
         GeoIndexed indexAnnotation = field.getAnnotation(GeoIndexed.class);
-        String actualKey = indexAnnotation.alias().isBlank() ? key : indexAnnotation.alias();
+        String actualKey = indexAnnotation.alias().trim().isEmpty() ? key : indexAnnotation.alias();
         qf.add(Pair.of(actualKey, QueryClause.get(FieldType.Geo, part.getType())));
       } else if (field.isAnnotationPresent(NumericIndexed.class)) {
         NumericIndexed indexAnnotation = field.getAnnotation(NumericIndexed.class);
-        String actualKey = indexAnnotation.alias().isBlank() ? key : indexAnnotation.alias();
+        String actualKey = indexAnnotation.alias().trim().isEmpty() ? key : indexAnnotation.alias();
         qf.add(Pair.of(actualKey, QueryClause.get(FieldType.Numeric, part.getType())));
       } else if (field.isAnnotationPresent(Indexed.class)) {
         Indexed indexAnnotation = field.getAnnotation(Indexed.class);
-        String actualKey = indexAnnotation.alias().isBlank() ? key : indexAnnotation.alias();
+        String actualKey = indexAnnotation.alias().trim().isEmpty() ? key : indexAnnotation.alias();
         Class<?> fieldType = ClassUtils.resolvePrimitiveIfNecessary(field.getType());
         //
         // Any Character class or Boolean -> Tag Search Field
@@ -386,12 +386,12 @@ public class RediSearchQuery implements RepositoryQuery {
         }
       }
     }
-    
+
     if ((limit != null && limit != Integer.MIN_VALUE) || (offset != null && offset != Integer.MIN_VALUE)) {
       query.limit(offset != null ? offset : 10, limit != null ? limit : 0);
     }
-    
-    if ((sortBy != null && !sortBy.isBlank())) {
+
+    if ((sortBy != null && !sortBy.trim().isEmpty())) {
       query.setSortBy(sortBy, sortAscending);
     }
 
@@ -458,7 +458,7 @@ public class RediSearchQuery implements RepositoryQuery {
 
     // load
     for (Map.Entry<String, String> apply : aggregationLoad) {
-      if (apply.getValue().isBlank()) {
+      if (apply.getValue().trim().isEmpty()) {
         aggregation.load(apply.getKey());
       } else {
         aggregation.load(apply.getKey(), "AS", apply.getValue());
@@ -503,7 +503,7 @@ public class RediSearchQuery implements RepositoryQuery {
       }
     }
 
-    if ((sortBy != null && !sortBy.isBlank())) {
+    if ((sortBy != null && !sortBy.trim().isEmpty())) {
       aggregation.sortByAsc(sortBy);
     } else if (!aggregationSortedFields.isEmpty()) {
       if (aggregationSortByMax != null) {
@@ -531,7 +531,7 @@ public class RediSearchQuery implements RepositoryQuery {
     if (queryMethod.getReturnedObjectType() == AggregationResult.class) {
       result = aggregationResult;
     } else if (queryMethod.getReturnedObjectType() == Map.class) {
-      List<?> content = List.of();
+      List<?> content = Arrays.asList();
       if (queryMethod.getReturnedObjectType() == Map.class) {
         content = aggregationResult.getResults().stream().map(m ->
           m.entrySet().stream() //
@@ -582,7 +582,7 @@ public class RediSearchQuery implements RepositoryQuery {
       Iterator<Parameter> iterator = (Iterator<Parameter>) queryMethod.getParameters().iterator();
       int index = 0;
 
-      if (value != null && !value.isBlank()) {
+      if (value != null && !value.trim().isEmpty()) {
         preparedQuery.append(value);
       }
 
@@ -590,7 +590,7 @@ public class RediSearchQuery implements RepositoryQuery {
         Parameter p = iterator.next();
         Optional<String> maybeKey = p.getName();
         String key = (maybeKey.isPresent() ? maybeKey.get() : (paramNames.size() > index ? paramNames.get(index) : ""));
-        if (!key.isBlank()) {
+        if (!key.trim().isEmpty()) {
           String v = "";
 
           if (parameters[index] instanceof Collection<?>) {

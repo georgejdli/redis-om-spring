@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.requireNonNull;
 
 @SupportedAnnotationTypes("com.redis.om.spring.annotations.Document")
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 public final class MetamodelGenerator extends AbstractProcessor {
 
@@ -108,7 +108,7 @@ public final class MetamodelGenerator extends AbstractProcessor {
     List<FieldSpec> nestedFieldsConstants = new ArrayList<>();
 
     enclosedFields.forEach((field, getter) -> {
-      List<Triple<ObjectGraphFieldSpec, FieldSpec, CodeBlock>> fieldMetamodels = processFieldMetamodel(entity, entityName, List.of(field));
+      List<Triple<ObjectGraphFieldSpec, FieldSpec, CodeBlock>> fieldMetamodels = processFieldMetamodel(entity, entityName, Arrays.asList(field));
       for (Triple<ObjectGraphFieldSpec, FieldSpec, CodeBlock> fieldMetamodel: fieldMetamodels) {
         fields.add(fieldMetamodel.getFirst());
         interceptors.add(fieldMetamodel.getSecond());
@@ -523,7 +523,8 @@ public final class MetamodelGenerator extends AbstractProcessor {
     return sb.toString();
   }
 
-  static final Set<String> JAVA_LITERAL_WORDS = Set.of("true", "false", "null");
+  static final Set<String> JAVA_LITERAL_WORDS = new HashSet<>(Arrays.asList("true", "false", "null"));
+
 
   // Java reserved keywords
   static final Set<String> JAVA_RESERVED_WORDS = Collections.unmodifiableSet(Stream.of(
@@ -536,10 +537,11 @@ public final class MetamodelGenerator extends AbstractProcessor {
       "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile",
       "const", "float", "native", "super", "while").collect(Collectors.toSet()));
 
-  static final Set<Class<?>> JAVA_BUILT_IN_CLASSES = Set.of(Boolean.class, Byte.class, Character.class, Double.class,
-      Float.class, Integer.class, Long.class, Object.class, Short.class, String.class, BigDecimal.class,
-      BigInteger.class, boolean.class, byte.class, char.class, double.class, float.class, int.class, long.class,
-      short.class);
+  static final Set<Class<?>> JAVA_BUILT_IN_CLASSES = new HashSet<>(
+      Arrays.asList(Boolean.class, Byte.class, Character.class, Double.class,
+          Float.class, Integer.class, Long.class, Object.class, Short.class, String.class, BigDecimal.class,
+          BigInteger.class, boolean.class, byte.class, char.class, double.class, float.class, int.class, long.class,
+          short.class));
 
   private static final Set<String> JAVA_BUILT_IN_CLASS_WORDS = Collections
       .unmodifiableSet(JAVA_BUILT_IN_CLASSES.stream().map(Class::getSimpleName).collect(Collectors.toSet()));

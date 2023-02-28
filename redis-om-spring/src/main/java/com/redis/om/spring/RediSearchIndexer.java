@@ -274,7 +274,7 @@ public class RediSearchIndexer {
       //
       else {
         for (java.lang.reflect.Field subfield : field.getType().getDeclaredFields()) {
-          String subfieldPrefix = (prefix == null || prefix.isBlank()) ? field.getName()
+          String subfieldPrefix = (prefix == null || prefix.trim().isEmpty()) ? field.getName()
               : String.join(".", prefix, field.getName());
           fields.addAll(findIndexFields(subfield, subfieldPrefix, isDocument));
         }
@@ -313,7 +313,7 @@ public class RediSearchIndexer {
 
   private Field indexAsTagFieldFor(java.lang.reflect.Field field, boolean isDocument, String prefix, TagIndexed ti) {
     ClassTypeInformation<?> typeInfo = ClassTypeInformation.from(field.getType());
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = isDocument ? "$." + chain : chain;
     String fieldPrefix = getFieldPrefix(prefix, isDocument);
 
@@ -334,7 +334,7 @@ public class RediSearchIndexer {
   private Field indexAsTagFieldFor(java.lang.reflect.Field field, boolean isDocument, String prefix, boolean sortable,
       String separator, int arrayIndex) {
     ClassTypeInformation<?> typeInfo = ClassTypeInformation.from(field.getType());
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = isDocument ? "$." + chain : chain;
     String fieldPrefix = getFieldPrefix(prefix, isDocument);
     String index = (arrayIndex != Integer.MIN_VALUE) ? ".[" + arrayIndex + "]" : "[*]";
@@ -345,11 +345,11 @@ public class RediSearchIndexer {
 
     fieldName = fieldName.as(QueryUtils.searchIndexFieldAliasFor(field, prefix));
 
-    return new TagField(fieldName, separator.isBlank() ? null : separator, sortable);
+    return new TagField(fieldName, separator.trim().isEmpty() ? null : separator, sortable);
   }
 
   private Field indexAsTextFieldFor(java.lang.reflect.Field field, boolean isDocument, String prefix, TextIndexed ti) {
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = isDocument ? "$." + chain : chain;
 
     String fieldPrefix = getFieldPrefix(prefix, isDocument);
@@ -367,7 +367,7 @@ public class RediSearchIndexer {
   }
 
   private Field indexAsTextFieldFor(java.lang.reflect.Field field, boolean isDocument, String prefix, Searchable ti) {
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = isDocument ? "$." + chain : chain;
     String fieldPrefix = getFieldPrefix(prefix, isDocument);
     FieldName fieldName = FieldName.of(fieldPrefix + field.getName());
@@ -383,7 +383,7 @@ public class RediSearchIndexer {
   }
 
   private Field indexAsGeoFieldFor(java.lang.reflect.Field field, boolean isDocument, String prefix, GeoIndexed gi) {
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = isDocument ? "$." + chain : chain;
     String fieldPrefix = getFieldPrefix(prefix, isDocument);
     FieldName fieldName = FieldName.of(fieldPrefix + field.getName());
@@ -399,7 +399,7 @@ public class RediSearchIndexer {
 
   private Field indexAsNumericFieldFor(java.lang.reflect.Field field, boolean isDocument, String prefix,
       NumericIndexed ni) {
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = isDocument ? "$." + chain : chain;
     String fieldPrefix = getFieldPrefix(prefix, isDocument);
     FieldName fieldName = FieldName.of(fieldPrefix + field.getName());
@@ -415,7 +415,7 @@ public class RediSearchIndexer {
 
   private Field indexAsNumericFieldFor(java.lang.reflect.Field field, boolean isDocument, String prefix,
       boolean sortable, boolean noIndex) {
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = isDocument ? "$." + chain : chain;
     String fieldPrefix = getFieldPrefix(prefix, isDocument);
     FieldName fieldName = FieldName.of(fieldPrefix + field.getName());
@@ -427,7 +427,7 @@ public class RediSearchIndexer {
 
   private Field indexAsGeoFieldFor(java.lang.reflect.Field field, boolean isDocument, String prefix, boolean sortable,
       boolean noIndex) {
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = isDocument ? "$." + chain : chain;
     String fieldPrefix = getFieldPrefix(prefix, isDocument);
     FieldName fieldName = FieldName.of(fieldPrefix + field.getName());
@@ -438,7 +438,7 @@ public class RediSearchIndexer {
   }
 
   private List<Field> indexAsNestedFieldFor(java.lang.reflect.Field field, String prefix) {
-//    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+//    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
 //    String fieldPrefix = "$." + chain;
     String fieldPrefix = getFieldPrefix(prefix, true);
     return getNestedField(fieldPrefix, field, prefix, null);
@@ -558,7 +558,7 @@ public class RediSearchIndexer {
   }
 
   private String getFieldPrefix(String prefix, boolean isDocument) {
-    String chain = (prefix == null || prefix.isBlank()) ? "" : prefix + ".";
+    String chain = (prefix == null || prefix.trim().isEmpty()) ? "" : prefix + ".";
     return isDocument ? "$." + chain : chain;
   }
 }

@@ -1,6 +1,8 @@
 package com.redis.om.spring.serialization.gson;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,7 +31,7 @@ public class SetToStringAdapter extends TypeAdapter<Set<?>> {
     }
     String csv = reader.nextString();
     String[] parts = csv.split("\\|");
-    return Set.of(parts);
+    return new HashSet<>(Arrays.asList(parts));
   }
 
 }

@@ -2,6 +2,7 @@ package com.redis.om.spring.repository.support;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -9,6 +10,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +36,7 @@ import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.convert.KeyspaceConfiguration;
 import org.springframework.data.redis.core.convert.RedisData;
 import org.springframework.data.redis.core.convert.ReferenceResolverImpl;
+import org.springframework.data.redis.core.convert.KeyspaceConfiguration.KeyspaceSettings;
 import org.springframework.data.redis.core.mapping.RedisMappingContext;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.util.Assert;
@@ -96,7 +99,7 @@ public class SimpleRedisDocumentRepository<T, ID> extends SimpleKeyValueReposito
   public Iterable<ID> getIds() {
     String keyspace = indexer.getKeyspaceForEntityClass(metadata.getJavaType());
     Optional<String> maybeSearchIndex = indexer.getIndexName(keyspace);
-    List<ID> result = List.of();
+    List<ID> result = Arrays.asList();
     if (maybeSearchIndex.isPresent()) {
       SearchOperations<String> searchOps = modulesOperations.opsForSearch(maybeSearchIndex.get());
       Optional<Field> maybeIdField = ObjectUtils.getIdFieldForEntityClass(metadata.getJavaType());
@@ -219,7 +222,7 @@ public class SimpleRedisDocumentRepository<T, ID> extends SimpleKeyValueReposito
   }
 
   private void processAuditAnnotations(byte[] redisKey, Object item, boolean isNew) {
-    var auditClass = isNew ? CreatedDate.class : LastModifiedDate.class;
+    Class<? extends Annotation> auditClass = isNew ? CreatedDate.class : LastModifiedDate.class;
 
     List<Field> fields = com.redis.om.spring.util.ObjectUtils.getFieldsWithAnnotation(item.getClass(), auditClass);
     if (!fields.isEmpty()) {
@@ -239,7 +242,7 @@ public class SimpleRedisDocumentRepository<T, ID> extends SimpleKeyValueReposito
   private Optional<Long> getTTLForEntity(Object entity) {
     KeyspaceConfiguration keyspaceConfig = mappingContext.getMappingConfiguration().getKeyspaceConfiguration();
     if (keyspaceConfig.hasSettingsFor(entity.getClass())) {
-      var settings = keyspaceConfig.getKeyspaceSettings(entity.getClass());
+      KeyspaceSettings settings = keyspaceConfig.getKeyspaceSettings(entity.getClass());
 
       if (org.springframework.util.StringUtils.hasText(settings.getTimeToLivePropertyName())) {
         Method ttlGetter;

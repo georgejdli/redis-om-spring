@@ -33,6 +33,7 @@ public class AutoCompleteOptions {
   }
 
   public AutoCompleteOptions fuzzy() {
+    // must be some kind of Java 9 or annotation based magic, Java 11 works
     setFuzzy(true);
     return this;
   }

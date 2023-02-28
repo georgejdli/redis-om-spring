@@ -44,7 +44,7 @@ public class AggregationStreamImpl<E, T> implements AggregationStream<T> {
   @Override public AggregationStream<T> load(MetamodelField<?, ?>... fields) {
     applyCurrentGroupBy();
     if (fields.length > 0) {
-      var aliases = new ArrayList<String>();
+      ArrayList<String> aliases = new ArrayList<String>();
       for (MetamodelField<?, ?> mmf : fields) {
         aliases.add(mmf.getSearchAlias());
         returnFieldsTypeHints.put(mmf.getSearchAlias(), mmf.getTargetClass());
@@ -165,7 +165,8 @@ public class AggregationStreamImpl<E, T> implements AggregationStream<T> {
   private SortedField[] mapToSortedFields(Order... fields) {
     return Arrays.stream(fields) //
         .map(f -> f.isDescending() ? SortedField.desc(f.getProperty()) : SortedField.asc(f.getProperty())) //
-        .collect(Collectors.toList()) //
+        // just use Streams.toArray, why bother collecting to a list first?
+        //.collect(Collectors.toList()) //
         .toArray(SortedField[]::new);
   }
 
@@ -198,7 +199,7 @@ public class AggregationStreamImpl<E, T> implements AggregationStream<T> {
     AggregationResult aggregationResult = search.aggregate(aggregation);
 
     // package the results
-    String[] labels = returnFields.toArray(String[]::new);
+    String[] labels = returnFields.stream().toArray(String[]::new);
 
     List<?> asList = aggregationResult.getResults().stream().map(m -> { //
       List<Object> mappedValues = new ArrayList<>();
@@ -310,7 +311,7 @@ public class AggregationStreamImpl<E, T> implements AggregationStream<T> {
 
   private void createAggregationGroup(MetamodelField<?, ?>... fields) {
     if (fields.length > 0) {
-      var aliases = new ArrayList<String>();
+      ArrayList<String> aliases = new ArrayList<String>();
       for (MetamodelField<?, ?> mmf : fields) {
         aliases.add(mmf.getSearchAlias());
         returnFieldsTypeHints.put(mmf.getSearchAlias(), mmf.getTargetClass());
